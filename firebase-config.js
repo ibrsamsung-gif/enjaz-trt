@@ -1,9 +1,10 @@
-// ضع هنا بيانات Web App من Firebase Console > Project settings.
-// هذه القيم ليست كلمة مرور؛ حماية البيانات تتم بواسطة Firestore Security Rules.
-// لا تضع كلمة المرور أو Service Account key في هذا الملف.
+
 window.TRT_FIREBASE_CONFIG = {
-  apiKey: "PUT_FIREBASE_API_KEY_HERE",
-  authDomain: "PUT_PROJECT_ID.firebaseapp.com",
-  projectId: "PUT_PROJECT_ID",
-  appId: "PUT_FIREBASE_APP_ID_HERE"
+  apiKey: "AIzaSyB1RneW2hk-zg3KKwU3WS4jY9ng2UKxY4",
+  authDomain: "trt-worklog.firebaseapp.com",
+  projectId: "trt-worklog",
+  storageBucket: "trt-worklog.firebasestorage.app",
+  messagingSenderId: "475992877292",
+  appId: "1:475992877292:web:28d71d63af2145e9d3ddc9",
+  measurementId: "G-X8HGK5B1N7"
 };
