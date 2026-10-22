@@ -1,6 +1,6 @@
 
 window.TRT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyB1RneW2hk-zg3KKwU3WS4jY9ng2UKxY4",
+  apiKey: "AIzaSyB1RneWV2hk-zg3KKwU3WS4jY9ng2UKxY4",
   authDomain: "trt-worklog.firebaseapp.com",
   projectId: "trt-worklog",
   storageBucket: "trt-worklog.firebasestorage.app",
