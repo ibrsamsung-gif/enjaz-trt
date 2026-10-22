@@ -23,8 +23,12 @@
       <label>كلمة المرور<input type="password" id="authPassword" autocomplete="current-password" required /></label>
       <button class="btn primary wide" type="submit" id="authButton">دخول إلى سجلي</button>
     </form>
+    <div class="auth-options">
+      <button type="button" class="btn secondary wide" id="registerBtn">إنشاء حساب جديد بالبريد وكلمة المرور</button>
+      <button type="button" class="btn secondary wide" id="googleBtn">الدخول باستخدام Google</button>
+    </div>
     <div id="authFeedback" class="auth-feedback" role="status"></div>
-    <small>الحساب يُنشأ من لوحة Firebase الخاصة بك. لا يُنشر سجل أعمالك على GitHub.</small>
+    <small>يمكنك إنشاء حساب بنفسك. لا تُنشر تسجيلاتك على GitHub، ويُشترط تأكيد البريد للحسابات الجديدة.</small>
   </div>
 </div>
 <div class="shell" id="mainShell" hidden>
@@ -225,6 +229,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="firebase-config.js"></script>
 <script src="cloud.js"></script>
+<script src="template-base64.js"></script>
 <script src="invoice-word.js"></script>
 <script src="app.js"></script>
 </body>

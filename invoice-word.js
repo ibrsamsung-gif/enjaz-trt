@@ -51,9 +51,19 @@ window.TRTDocx=(function(){
    if(!Number.isInteger(m)||m<1||m>12||!Number.isInteger(y)||y<2000||y>2200)throw Error("شهر أو سنة غير صالح.");
    const sender=String(options.sender||"").trim();
    if(!sender||sender.length>100)throw Error("اسم المرسل غير صالح.");
-   const template=await fetch("templates/trt_invoice_template.docx",{cache:"no-cache"});
-   if(!template.ok)throw Error("تعذّر تحميل قالب الفاتورة الأصلي.");
-   const zip=await JSZip.loadAsync(await template.arrayBuffer());
+   let templateBytes;
+   try {
+     const template=await fetch("./templates/trt_invoice_template.docx",{cache:"no-store"});
+     if(!template.ok)throw Error("template unavailable");
+     templateBytes=await template.arrayBuffer();
+   }catch(e){
+     if(!window.TRT_TEMPLATE_BASE64)throw Error("قالب الفاتورة غير متوفر. تأكد من رفع مجلد templates أو ملف template-base64.js.");
+     const raw=atob(window.TRT_TEMPLATE_BASE64);
+     const bytes=new Uint8Array(raw.length);
+     for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+     templateBytes=bytes.buffer;
+   }
+   const zip=await JSZip.loadAsync(templateBytes);
    const entry=zip.file("word/document.xml");
    if(!entry)throw Error("النموذج لا يحتوي على ملف Word سليم.");
    const xml=new DOMParser().parseFromString(await entry.async("string"),"application/xml");

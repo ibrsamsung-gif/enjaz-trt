@@ -190,6 +190,12 @@
       db=firebase.firestore();
       auth.onAuthStateChanged(async user=>{
         uid=user?.uid??null;
+        if(user && user.providerData.some(p=>p.providerId==="password") && !user.emailVerified){
+          uid=null;
+          $("authFeedback").textContent="تحقق من بريدك الإلكتروني عبر الرسالة المرسلة إليك، ثم سجّل الدخول.";
+          await auth.signOut();
+          return;
+        }
         const logged=Boolean(uid);
         $("authScreen").hidden=logged;$("mainShell").hidden=!logged;
         if(logged) {
@@ -199,16 +205,54 @@
           }catch(e){if(window.msg)window.msg(errorText(e),true);}
         }
       },err=>$("authFeedback").textContent=errorText(err));
+      const registerBtn=$("registerBtn");
+      const googleBtn=$("googleBtn");
+      const sendVerification = async user => {
+        if (user && !user.emailVerified) await user.sendEmailVerification();
+      };
       $("authForm").addEventListener("submit",async ev=>{
         ev.preventDefault();
-        $("authButton").disabled=true;$("authFeedback").textContent="يتم التحقق من البيانات...";
-        try{
+        $("authButton").disabled=true;
+        $("authFeedback").textContent="جارٍ تسجيل الدخول...";
+        try {
           await auth.signInWithEmailAndPassword($("authEmail").value.trim(),$("authPassword").value);
           $("authFeedback").textContent="";
           $("authPassword").value="";
         }catch(err){$("authFeedback").textContent=errorText(err);}
         finally{$("authButton").disabled=false;}
       });
+      registerBtn?.addEventListener("click",async()=>{
+        const email=$("authEmail").value.trim(),password=$("authPassword").value;
+        if(!email||!password) {$("authFeedback").textContent="أدخل البريد وكلمة المرور لإنشاء الحساب.";return;}
+        if(password.length<8){$("authFeedback").textContent="اختر كلمة مرور لا تقل عن 8 أحرف.";return;}
+        registerBtn.disabled=true;
+        $("authFeedback").textContent="جارٍ إنشاء الحساب...";
+        try{
+          const result=await auth.createUserWithEmailAndPassword(email,password);
+          await sendVerification(result.user);
+          $("authFeedback").textContent="تم إنشاء الحساب وإرسال رسالة تحقق إلى بريدك الإلكتروني. افتح الرسالة، ثم سجل الدخول.";
+          await auth.signOut();
+          $("authPassword").value="";
+        }catch(err){$("authFeedback").textContent=errorText(err);}
+        finally{registerBtn.disabled=false;}
+      });
+      googleBtn?.addEventListener("click",async()=>{
+        googleBtn.disabled=true;
+        $("authFeedback").textContent="جارٍ الاتصال بحساب Google...";
+        try{
+          const provider=new firebase.auth.GoogleAuthProvider();
+          try{await auth.signInWithPopup(provider);}
+          catch(err){
+            if(["auth/popup-blocked","auth/operation-not-supported-in-this-environment"].includes(err.code))
+              await auth.signInWithRedirect(provider);
+            else throw err;
+          }
+          $("authFeedback").textContent="";
+        }catch(err){$("authFeedback").textContent=errorText(err);}
+        finally{googleBtn.disabled=false;}
+      });
+      auth.getRedirectResult().catch(err=>{$("authFeedback").textContent=errorText(err);});
+
     }catch(e){$("authFeedback").textContent=errorText(e);}
   }
   window.TRTCloud={api,backup,restoreBackup,csv,entries,signOut,download,errorText,launch};

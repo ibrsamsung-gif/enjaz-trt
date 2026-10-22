@@ -234,3 +234,5 @@ td .qty-badge{background:#edf5f4;padding:4px 10px;border-radius:6px;color:#0f877
  .gmt-controls{grid-template-columns:minmax(0,1fr)}
  .gmt-controls .btn{width:100%}
 }
+
+.auth-options{display:grid;gap:9px;margin-top:12px}.auth-options .btn{white-space:normal;line-height:1.6}
