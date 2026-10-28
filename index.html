@@ -19,12 +19,14 @@
     <h1>إنجاز | شبكة مراسلي TRT</h1>
     <p>نظام سحابي يعمل على الجوال والكمبيوتر. يتم حفظ التسجيلات في حسابك في Google Firebase.</p>
     <form id="authForm">
+      <label id="registrationNameWrap" hidden>الاسم الكامل بالإنجليزية (لإنشاء حساب جديد)<input type="text" id="registrationName" dir="ltr" maxlength="100" autocomplete="name" placeholder="Full name in English" pattern="[A-Za-z][A-Za-z .\u0027-]*" /></label>
       <label>البريد الإلكتروني<input type="email" id="authEmail" autocomplete="username" placeholder="name@example.com" required /></label>
       <label>كلمة المرور<input type="password" id="authPassword" autocomplete="current-password" required /></label>
       <button class="btn primary wide" type="submit" id="authButton">دخول إلى سجلي</button>
     </form>
     <div class="auth-options">
       <button type="button" class="btn secondary wide" id="registerBtn">إنشاء حساب جديد بالبريد وكلمة المرور</button>
+      <button type="button" class="btn secondary wide" id="resendVerificationBtn" hidden>إعادة إرسال رسالة تفعيل البريد</button>
       <button type="button" class="btn secondary wide" id="googleBtn">الدخول باستخدام Google</button>
     </div>
     <div id="authFeedback" class="auth-feedback" role="status"></div>

@@ -192,10 +192,13 @@
         uid=user?.uid??null;
         if(user && user.providerData.some(p=>p.providerId==="password") && !user.emailVerified){
           uid=null;
-          $("authFeedback").textContent="تحقق من بريدك الإلكتروني عبر الرسالة المرسلة إليك، ثم سجّل الدخول.";
-          await auth.signOut();
+          $("authScreen").hidden=false;
+          $("mainShell").hidden=true;
+          $("resendVerificationBtn").hidden=false;
+          $("authFeedback").textContent="الحساب غير مفعّل. تحقق من البريد الوارد أو الرسائل غير المرغوبة. يمكنك إعادة إرسال رسالة التفعيل.";
           return;
         }
+        $("resendVerificationBtn").hidden=true;
         const logged=Boolean(uid);
         $("authScreen").hidden=logged;$("mainShell").hidden=!logged;
         if(logged) {
@@ -207,6 +210,21 @@
       },err=>$("authFeedback").textContent=errorText(err));
       const registerBtn=$("registerBtn");
       const googleBtn=$("googleBtn");
+      const regNameWrap=$("registrationNameWrap");
+      const regName=$("registrationName");
+      registerBtn.addEventListener("click",()=>{regNameWrap.hidden=false;});
+      $("resendVerificationBtn").addEventListener("click",async()=>{
+        const user=auth.currentUser;
+        if(!user){$("authFeedback").textContent="سجل الدخول أولاً بالبريد وكلمة المرور لإعادة إرسال رسالة التفعيل.";return;}
+        const btn=$("resendVerificationBtn");btn.disabled=true;
+        try{
+          await user.reload();
+          if(user.emailVerified){$("authFeedback").textContent="البريد مفعّل. حدّث الصفحة للدخول.";return;}
+          await user.sendEmailVerification();
+          $("authFeedback").textContent="تم طلب إرسال رسالة تحقق جديدة. افحص البريد الوارد ومجلد الرسائل غير المرغوبة.";
+        }catch(err){$("authFeedback").textContent=errorText(err);}
+        finally{btn.disabled=false;}
+      });
       const sendVerification = async user => {
         if (user && !user.emailVerified) await user.sendEmailVerification();
       };
@@ -223,15 +241,19 @@
       });
       registerBtn?.addEventListener("click",async()=>{
         const email=$("authEmail").value.trim(),password=$("authPassword").value;
+        const fullName=regName.value.trim();
+        if(!fullName){regNameWrap.hidden=false;$("authFeedback").textContent="اكتب اسمك الكامل بالإنجليزية أولاً، ثم اضغط إنشاء حساب مرة ثانية.";regName.focus();return;}
+        if(!/^[A-Za-z][A-Za-z .'-]*$/.test(fullName)){$("authFeedback").textContent="اكتب الاسم باستخدام الحروف الإنجليزية فقط.";return;}
         if(!email||!password) {$("authFeedback").textContent="أدخل البريد وكلمة المرور لإنشاء الحساب.";return;}
         if(password.length<8){$("authFeedback").textContent="اختر كلمة مرور لا تقل عن 8 أحرف.";return;}
         registerBtn.disabled=true;
         $("authFeedback").textContent="جارٍ إنشاء الحساب...";
         try{
           const result=await auth.createUserWithEmailAndPassword(email,password);
+          await result.user.updateProfile({displayName:fullName});
           await sendVerification(result.user);
-          $("authFeedback").textContent="تم إنشاء الحساب وإرسال رسالة تحقق إلى بريدك الإلكتروني. افتح الرسالة، ثم سجل الدخول.";
-          await auth.signOut();
+          $("authFeedback").textContent="تم إنشاء الحساب وطلب إرسال رسالة تفعيل البريد. افحص الوارد والرسائل غير المرغوبة، ثم أعد فتح الموقع بعد التفعيل.";
+          $("resendVerificationBtn").hidden=false;
           $("authPassword").value="";
         }catch(err){$("authFeedback").textContent=errorText(err);}
         finally{registerBtn.disabled=false;}
