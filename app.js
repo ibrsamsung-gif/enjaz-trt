@@ -203,14 +203,18 @@ async function deleteEntry(id){
 }
 async function saveEntry(e){
   e.preventDefault();
-  // If the user typed a valid manual time but did not tap "add", include it on save.
+  // Manual and preset GMT times are independent alternatives.
   const pending=$("gmtManual").value.trim();
+  const selectedCategory=state.categories.find(c=>String(c.id)===$("entryCategory").value);
   if(pending){
-    if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(pending)){
+    const normalized=normalizeTime(pending);
+    if(!normalized){
       msg("الوقت اليدوي يجب أن يكون GMT بصيغة HH:mm مثل 14:35.",true);return;
     }
-    if(!pickedTimes.includes(pending))addPickedTime(pending);
+    if(!pickedTimes.includes(normalized))addPickedTime(normalized);
     $("gmtManual").value="";
+  } else if(selectedCategory?.name==="LIVE DTL" && pickedTimes.length===0){
+    addPickedTime($("gmtHour").value);
   }
   const id=$("entryId").value;
   const data={
@@ -221,7 +225,6 @@ async function saveEntry(e){
     quantity:Number($("entryQuantity").value)
   };
   if(!data.story){msg("أدخل وصف الإنجاز",true);return;}
-  const selectedCategory=state.categories.find(c=>Number(c.id)===data.category_id);
   if(selectedCategory?.name==="LIVE DTL"&&!pickedTimes.length){
     msg("اختر على الأقل موعد بث واحد بتوقيت GMT.",true);return;
   }
@@ -334,6 +337,7 @@ function init(){
   $("entryForm").addEventListener("submit",saveEntry);
   $("gmtHour").innerHTML=Array.from({length:24},(_,h)=>`<option value="${pad(h)}:00">${pad(h)}:00 GMT</option>`).join("");
   $("addGmtHour").onclick=()=>addPickedTime($("gmtHour").value);
+  $("gmtHour").addEventListener("change",()=>addPickedTime($("gmtHour").value));
   $("addGmtManual").onclick=()=>{
     const raw=$("gmtManual").value;
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(raw)){msg("الوقت اليدوي بصيغة 24 ساعة، مثل 08:30 أو 17:45.",true);return;}
